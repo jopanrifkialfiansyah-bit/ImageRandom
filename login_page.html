@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Login & Registrasi</title>
+    <style>
+        /* --- CSS (Tampilan) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 25px;
+        }
+        h3 {
+            color: #333;
+            margin-top: 5px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 20px; /* Menjaga ruang pesan */
+        }
+        .error { color: red; }
+        .success { color: green; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>Aplikasi Login</h2>
+        
+        <div id="login-form">
+            <h3>Login Akun</h3>
+            <input type="text" id="username-login" placeholder="Username" required>
+            <input type="password" id="password-login" placeholder="Password" required>
+            <button onclick="handleLogin()">LOGIN</button>
+            <p style="margin-top: 15px; font-size: 0.9em;">Belum punya akun? <a href="#" onclick="showRegister()">Daftar di sini</a></p>
+        </div>
+
+        <div id="register-form" style="display: none;">
+            <h3>Daftar Akun Baru</h3>
+            <input type="text" id="username-register" placeholder="Buat Username Baru" required>
+            <input type="password" id="password-register" placeholder="Buat Password Baru" required>
+            <button onclick="handleRegister()">DAFTAR</button>
+            <p style="margin-top: 15px; font-size: 0.9em;"><a href="#" onclick="showLogin()">Kembali ke Login</a></p>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // KREDENSIAL DEFAULT (Akun ini sudah ada tanpa perlu daftar)
+        const DEFAULT_USER = "BKKJ210";
+        const DEFAULT_PASS = "101112";
+
+        const messageElement = document.getElementById('message');
+
+        // --- MANAJEMEN AKUN (Penyimpanan di Browser) ---
+
+        function getAccounts() {
+            // Mengambil akun dari penyimpanan lokal browser
+            let accounts = JSON.parse(localStorage.getItem('userAccounts'));
+            
+            if (!accounts) {
+                // Jika belum ada akun tersimpan, buat akun default
+                accounts = {};
+                accounts[DEFAULT_USER] = DEFAULT_PASS;
+                saveAccounts(accounts);
+            }
+            return accounts;
+        }
+
+        function saveAccounts(accounts) {
+            // Menyimpan akun ke penyimpanan lokal
+            localStorage.setItem('userAccounts', JSON.stringify(accounts));
+        }
+
+        // --- FUNGSI TAMPILAN FORM ---
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            messageElement.textContent = '';
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            messageElement.textContent = '';
+        }
+
+        // --- FUNGSI DAFTAR AKUN ---
+
+        function handleRegister() {
+            const usernameReg = document.getElementById('username-register').value.trim();
+            const passwordReg = document.getElementById('password-register').value.trim();
+            let accounts = getAccounts();
+
+            if (!usernameReg || !passwordReg) {
+                messageElement.textContent = "Username dan Password tidak boleh kosong.";
+                messageElement.className = 'error';
+                return;
+            }
+
+            if (accounts.hasOwnProperty(usernameReg)) {
+                messageElement.textContent = "Username sudah terdaftar.";
+                messageElement.className = 'error';
+                return;
+            }
+
+            // Simpan Akun Baru
+            accounts[usernameReg] = passwordReg;
+            saveAccounts(accounts);
+            
+            messageElement.textContent = `Daftar berhasil untuk ${usernameReg}! Silakan Login.`;
+            messageElement.className = 'success';
+            
+            // Kembali ke form login setelah 1 detik
+            setTimeout(() => {
+                showLogin();
+                document.getElementById('username-login').value = usernameReg;
+            }, 1000);
+        }
+
+        // --- FUNGSI LOGIN AKUN ---
+
+        function handleLogin() {
+            const usernameInput = document.getElementById('username-login').value.trim();
+            const passwordInput = document.getElementById('password-login').value.trim();
+            const accounts = getAccounts(); 
+
+            if (accounts.hasOwnProperty(usernameInput) && accounts[usernameInput] === passwordInput) {
+                // Login Berhasil
+                messageElement.textContent = `Login Berhasil! Selamat datang, ${usernameInput}.`;
+                messageElement.className = 'success';
+                
+                // Pindah ke halaman gambar (image_page.html) setelah 1 detik
+                setTimeout(() => {
+                    window.location.href = 'image_page.html';
+                }, 1000);
+
+            } else {
+                // Login Gagal
+                messageElement.textContent = "Username atau Password salah!";
+                messageElement.className = 'error';
+            }
+        }
+        
+        // Memastikan akun default sudah dimuat saat halaman pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', getAccounts);
+    </script>
+</body>
+</html>
